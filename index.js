@@ -25,14 +25,17 @@ var listener = app.listen(port, function () {
 });
 
 app.get('/save', function(req, res){
-  APIrequest(simpleRequest).pipe(fs.createWriteStream(saveLocation))
-  res.sendFile(__dirname + '/public/saveScreen.html')
+  var stream = APIrequest(simpleRequest).pipe(fs.createWriteStream(saveLocation));
+  stream.on('finish', function () { 
+	res.sendFile(__dirname + '/public/saveScreen.html')
+  });
+  
 });
 
 app.get('/visualize', function(req, res){
   APIrequest(simpleRequest, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      var info = JSON.parse(body)
+      var info = JSON.parse(body);
       // do more stuff
       console.log(info);
       res.send(info);
