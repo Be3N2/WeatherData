@@ -6,6 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "express": "^4.15.5",
+    "express-session": "^1.15.6"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Be3N2/WeatherData.git"
