@@ -1,0 +1,19 @@
+{
+  "name": "saveweatherdata",
+  "version": "1.0.0",
+  "description": "Save JSON response to a file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Be3N2/WeatherData.git"
+  },
+  "author": "Ben Wakefield",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Be3N2/WeatherData/issues"
+  },
+  "homepage": "https://github.com/Be3N2/WeatherData#readme"
+}
