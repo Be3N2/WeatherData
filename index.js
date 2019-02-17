@@ -56,6 +56,8 @@ app.get('/ravenna', function(req, res){
 	var unixtime = date.getTime()/1000;
 
 	//for loop start
+	//Async for loop needed: reference
+	//https://stackoverflow.com/questions/21184340/async-for-loop-in-node-js
 	//decide on exact time
 	var ravennaRequest = ravennaFirstPart + unixtime + ravennaSecondPart;
 	var daymonthyear = date.getDate() + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
