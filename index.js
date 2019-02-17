@@ -5,6 +5,7 @@ var express = require('express');
 var app = express();
 var APIrequest = require('request');
 var fs = require('fs');
+var async = require('async');
 var simpleRequest = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1941795,-80.7491454?exclude=minutely,hourly,alerts,flags";
 var saveLocation = "data.txt";
 
@@ -14,6 +15,9 @@ app.get("/", function (req, res) {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
+const monthNames = ["January", "February", "March", "April", "May", "June",
+	  "July", "August", "September", "October", "November", "December"
+];
 
 //app.get("/shorten/*", addUrl);
 var port = process.env.PORT || 3000;
@@ -45,62 +49,67 @@ app.get('/visualize', function(req, res){
 
 app.get('/ravenna', function(req, res){
 	//loop ravenna calls
-	var ravennaWeather = {"weatherData":[]};
-	const monthNames = ["January", "February", "March", "April", "May", "June",
-	  "July", "August", "September", "October", "November", "December"
-	];
+	var ravennaWeather = {"location": "Ravenna, OH","startDate": "28-May-2018","endDate": "14-Oct-2018","weatherData":[]};
 	
 	var ravennaFirstPart = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,";
 	var ravennaSecondPart = "?exclude=minutely,hourly,alerts,flags";
 
-	var date = new Date("28-May-2018 17:00:00");
-	var unixStartTime = date.getTime()/1000;
+	var startDate = new Date("28-May-2018 17:00:00");
+	var unixStartTime = startDate.getTime()/1000;
 
 	var endDate = new Date("14-Oct-2018 17:00:00");
 	var unixEndTime = endDate.getTime()/1000;
 
+	//var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
+	//var ravennaRequests = [];
+	//ravennaRequests.push({"unixTime": unixStartTime,"request": ravennaFirstPart + unixStartTime + ravennaSecondPart});
+	endDate = new Date("29-May-2018 17:00:00");
+	unixEndTime = endDate.getTime()/1000;
 	var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
-	//for loop start
-	//Async for loop needed: reference
-	//https://stackoverflow.com/questions/21184340/async-for-loop-in-node-js
-	//decide on exact time
 
-	var daymonthyear = date.getDate() + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
-	var input = {"day": daymonthyear,"unixTime": unixtime, "data": {}};
+	//Theres also the async package with async.forEachOfSeries();
+	//https://github.com/caolan/async/blob/v1.5.2/README.md
+	//https://stackoverflow.com/questions/35258277/difference-between-async-each-and-async-eachseries
+	async.eachSeries(ravennaRequests, function iterator(item, callback) {
+		var date = new Date(item.unixTime * 1000);
+	  	var daymonthyear = date.getDate() + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
+		var input = {"day": daymonthyear,"unixTime": item.unixTime,"request": item.request, "data": {}};
 
-	APIrequest(ravennaRequests[0], function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var info = JSON.parse(body);
-			// do more stuff
-			input.data = info;
-			ravennaWeather.weatherData.push(input);
-		}
+		APIrequest(item.request, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var info = JSON.parse(body);
+				// do more stuff
+				input.data = info;
+				ravennaWeather.weatherData.push(input);
+				callback();
+			}
+		});
+		
+	}, function done() {
+	  	//All data recieved: write data
+		var ravennaSave = "ravenna.txt";
+		fs.writeFile(ravennaSave, JSON.stringify(ravennaWeather), function(err) {
+		    if(err) {
+		        return console.log(err);
+		    }
+
+		    console.log("The file was saved!");
+		}); 
+
+		res.send(ravennaWeather);
 	});
 	
-	//for loop end
-
-	//All data recieved: write data
-	var ravennaSave = "ravenna.txt";
-	fs.writeFile(ravennaSave, JSON.stringify(ravennaWeather), function(err) {
-	    if(err) {
-	        return console.log(err);
-	    }
-
-	    console.log("The file was saved!");
-	}); 
-
-	res.send(ravennaWeather);
 });
 
-function buildRequests(var firstPart, var secondPart, var unixStartTime, var unixEndTime) {
+function buildRequests(firstPart, secondPart, unixStartTime, unixEndTime) {
 	var allRequests = [];
 
 	for (var i = unixStartTime; i <= unixEndTime; i += 86400) {
 		var step = new Date(i * 1000);
-		console.log(step.getDate() + "-" + monthNames[step.getMonth()] + "-" + step.getFullYear() + " " + step.getHours());
+		//console.log(step.getDate() + "-" + monthNames[step.getMonth()] + "-" + step.getFullYear() + " " + step.getHours());
 		var singleRequest = firstPart + i + secondPart;
-		allRequests.push(singleRequest);
-		console.log(singleRequest);
+		allRequests.push({"unixTime": i, "request": singleRequest});
+		//console.log(singleRequest);
 	}
 	return allRequests;
 }
