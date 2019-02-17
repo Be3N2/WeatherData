@@ -33,7 +33,7 @@ app.get('/save', function(req, res){
 });
 
 app.get('/visualize', function(req, res){
-	APIrequest(simpleRequest, function (error, response, body) {
+	APIrequest("https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,1539550800?exclude=minutely,hourly,alerts,flags", function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			var info = JSON.parse(body);
 			// do more stuff
@@ -49,31 +49,37 @@ app.get('/ravenna', function(req, res){
 	const monthNames = ["January", "February", "March", "April", "May", "June",
 	  "July", "August", "September", "October", "November", "December"
 	];
+	
 	var ravennaFirstPart = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,";
 	var ravennaSecondPart = "?exclude=minutely,hourly,alerts,flags";
 
 	var date = new Date("28-May-2018 17:00:00");
-	var unixtime = date.getTime()/1000;
+	var unixStartTime = date.getTime()/1000;
 
+	var endDate = new Date("14-Oct-2018 17:00:00");
+	var unixEndTime = endDate.getTime()/1000;
+
+	var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
 	//for loop start
 	//Async for loop needed: reference
 	//https://stackoverflow.com/questions/21184340/async-for-loop-in-node-js
 	//decide on exact time
-	var ravennaRequest = ravennaFirstPart + unixtime + ravennaSecondPart;
+
 	var daymonthyear = date.getDate() + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
 	var input = {"day": daymonthyear,"unixTime": unixtime, "data": {}};
 
-	APIrequest(ravennaRequest, function (error, response, body) {
+	APIrequest(ravennaRequests[0], function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			var info = JSON.parse(body);
 			// do more stuff
 			input.data = info;
+			ravennaWeather.weatherData.push(input);
 		}
 	});
-	ravennaWeather.weatherData[0] = input;
+	
 	//for loop end
 
-	//write data
+	//All data recieved: write data
 	var ravennaSave = "ravenna.txt";
 	fs.writeFile(ravennaSave, JSON.stringify(ravennaWeather), function(err) {
 	    if(err) {
@@ -85,3 +91,16 @@ app.get('/ravenna', function(req, res){
 
 	res.send(ravennaWeather);
 });
+
+function buildRequests(var firstPart, var secondPart, var unixStartTime, var unixEndTime) {
+	var allRequests = [];
+
+	for (var i = unixStartTime; i <= unixEndTime; i += 86400) {
+		var step = new Date(i * 1000);
+		console.log(step.getDate() + "-" + monthNames[step.getMonth()] + "-" + step.getFullYear() + " " + step.getHours());
+		var singleRequest = firstPart + i + secondPart;
+		allRequests.push(singleRequest);
+		console.log(singleRequest);
+	}
+	return allRequests;
+}
