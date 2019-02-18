@@ -10,78 +10,77 @@ var green1 = "#9b9844";
 var yellow1 = "#fdd57d";
 var pink1 = "#d6a7b4";
 
-//possible weather values
-//clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night
+var data = {};
+
+function preload() {
+  // preload() runs once
+  data = loadJSON('/getdata');
+}
 
 function setup() {
+	print(data);
 	createCanvas(blanketWidth * blockWidth + 1, blanketHeight * blockWidth + 1);
 	background(51);
 	for (var y = 0; y < blanketHeight; y++) {
 		for (var x = 0; x < blanketWidth; x++) {
+			
+			//basic structure of the data in the file
+			//{"location": "Ravenna, OH","startDate": "28-May-2018","endDate": "14-Oct-2018","weatherData":[]};
+
 			var colorCode;
-			switch (Math.trunc(random(6))) {
-				case 0:
-					colorCode = yellow1;
-					break;
-				case 1:
-					colorCode = darkgreen1;
-					break;
-				case 2:
-					colorCode = green1;
-					break;
-				case 3:
-					colorCode = teal1;
-					break;
-				case 4:
-					colorCode = blue1;
-					break;
-				case 5:
-				default:
-					colorCode = pink1;
-			}
+			var icon;
+			if (x + y * blanketWidth < data.weatherData.length) {
+				icon = data.weatherData[x + y * blanketWidth].data.currently.icon;
+				//icon = data.weatherData[x + y * blanketWidth].data.daily.data[0].icon;
+				//possible icon values
+				//clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night
+				switch (icon) {
+					case "clear-day":
+					case "clear-night":
+						colorCode = yellow1;
+						break;
+					case "rain":
+					case "snow":
+						colorCode = teal1;
+						break;
+					case "wind":
+						colorCode = green1;
+						break;
+					case "sleet":
+					case "fog":
+						colorCode = blue1;
+						break;
+					case "cloudy":
+						colorCode = darkgreen1;
+						break;
+					case "partly-cloudy-day":
+					case "partly-cloudy-night":
+						colorCode = pink1;
+						break;
+					default:
+						console.log("SOME OTHER ICON VALUE: " + icon);
+						colorCode = "#000000";
+				}
+			} else 
+				colorCode = "#ffffff";
+				
+			
 			fill(colorCode);
 			var locationx = x * blockWidth;
 			var locationy = y * blockWidth;
 			rect(locationx, locationy, blockWidth, blockWidth);
-
-
 		}
-	}	
-	//UTC time is 5 hours ahead
-	//one day 86400
 
-	//daylight savings
-	//var date = new Date("3-Nov-2018 17:00:00");
-
-	//28-May 14-Oct in Ravenna
-	//15 Oct Today in Greensville
-	var ravennaFirstPart = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,";
-	var ravennaSecondPart = "?exclude=minutely,hourly,alerts,flags";
-	var ravennaRequests = [];
-
-
-	var date = new Date("28-May-2018 17:00:00");
-	var unixTime = date.getTime()/1000;
-
-	var endDate = new Date("14-Oct-2018 17:00:00");
-	var unixEndDate = endDate.getTime()/1000;
-	const monthNames = ["January", "February", "March", "April", "May", "June",
-	  "July", "August", "September", "October", "November", "December"
-	];
-	for (var i = unixTime; i <= unixEndDate; i += 86400) {
-		var step = new Date(i * 1000);
-		console.log(step.getDate() + "-" + monthNames[step.getMonth()] + "-" + step.getFullYear() + " " + step.getHours());
-		var singleRequest = ravennaFirstPart + i + ravennaSecondPart;
-		ravennaRequests.push(singleRequest);
-		console.log(singleRequest);
 	}
-}
+}	
+	
+
 
 
 function draw() {
 	
 }
+
 function mouseClicked() {
 
 }
-

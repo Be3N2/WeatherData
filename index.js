@@ -37,7 +37,18 @@ app.get('/save', function(req, res){
 });
 
 app.get('/visualize', function(req, res){
-	APIrequest("https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,1539550800?exclude=minutely,hourly,alerts,flags", function (error, response, body) {
+	res.sendFile(__dirname + '/public/visualize.html');
+});
+app.get('/getdata', function(req, res){
+	fs.readFile('ravenna.txt', 'utf8', function (err, data) {
+	    if (err) throw err; // we'll not consider error handling for now
+	    var obj = JSON.parse(data);
+	    res.send(obj);
+	});
+});
+
+app.get('/data', function(req, res){
+	APIrequest(simpleRequest, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			var info = JSON.parse(body);
 			// do more stuff
@@ -48,7 +59,12 @@ app.get('/visualize', function(req, res){
 });
 
 app.get('/ravenna', function(req, res){
-	//loop ravenna calls
+	//UTC time is 5 hours ahead
+	//one day 86400
+
+	//daylight savings
+	//var date = new Date("3-Nov-2018 17:00:00");
+
 	var ravennaWeather = {"location": "Ravenna, OH","startDate": "28-May-2018","endDate": "14-Oct-2018","weatherData":[]};
 	
 	var ravennaFirstPart = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/41.1575566,-81.2420473,";
@@ -63,8 +79,8 @@ app.get('/ravenna', function(req, res){
 	//var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
 	//var ravennaRequests = [];
 	//ravennaRequests.push({"unixTime": unixStartTime,"request": ravennaFirstPart + unixStartTime + ravennaSecondPart});
-	endDate = new Date("29-May-2018 17:00:00");
-	unixEndTime = endDate.getTime()/1000;
+	//endDate = new Date("29-May-2018 17:00:00");
+	//unixEndTime = endDate.getTime()/1000;
 	var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
 
 	//Theres also the async package with async.forEachOfSeries();
