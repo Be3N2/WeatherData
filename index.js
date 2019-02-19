@@ -47,6 +47,14 @@ app.get('/getdata', function(req, res){
 	});
 });
 
+app.get('/greenvilledata', function(req, res){
+	fs.readFile('greenville.txt', 'utf8', function (err, data) {
+	    if (err) throw err; // we'll not consider error handling for now
+	    var obj = JSON.parse(data);
+	    res.send(obj);
+	});
+});
+
 app.get('/data', function(req, res){
 	APIrequest(simpleRequest, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -116,6 +124,66 @@ app.get('/ravenna', function(req, res){
 	});
 	
 });
+
+app.get('/greenville', function(req, res){
+	//UTC time is 5 hours ahead
+	//one day 86400
+
+	//daylight savings
+	//var date = new Date("3-Nov-2018 17:00:00");
+
+	var greenvilleWeather = {"location": "Greenville, OH","startDate": "15-Oct-2018","endDate": "18-Feb-2019","weatherData":[]};
+	
+	var greenvilleFirstPart = "https://api.darksky.net/forecast/f87eebf5030c5df083e9201182cb560c/34.852619,-82.394012,";
+	var greenvilleSecondPart = "?exclude=minutely,hourly,alerts,flags";
+
+	var startDate = new Date("15-Oct-2018 17:00:00");
+	var unixStartTime = startDate.getTime()/1000;
+
+	var endDate = new Date("18-Feb-2019 20:00:00");
+	var unixEndTime = endDate.getTime()/1000;
+
+	//var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)
+	//var ravennaRequests = [];
+	//ravennaRequests.push({"unixTime": unixStartTime,"request": ravennaFirstPart + unixStartTime + ravennaSecondPart});
+	//endDate = new Date("16-Oct-2018 17:00:00");
+	//unixEndTime = endDate.getTime()/1000;
+	var greenvilleRequests = buildRequests(greenvilleFirstPart, greenvilleSecondPart, unixStartTime, unixEndTime)
+
+	//Theres also the async package with async.forEachOfSeries();
+	//https://github.com/caolan/async/blob/v1.5.2/README.md
+	//https://stackoverflow.com/questions/35258277/difference-between-async-each-and-async-eachseries
+	async.eachSeries(greenvilleRequests, function iterator(item, callback) {
+		var date = new Date(item.unixTime * 1000);
+	  	var daymonthyear = date.getDate() + "-" + monthNames[date.getMonth()] + "-" + date.getFullYear();
+		var input = {"day": daymonthyear,"unixTime": item.unixTime,"request": item.request, "data": {}};
+
+		APIrequest(item.request, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var info = JSON.parse(body);
+				// do more stuff
+				input.data = info;
+				greenvilleWeather.weatherData.push(input);
+				callback();
+			}
+		});
+		
+	}, function done() {
+	  	//All data recieved: write data
+		var greenvilleSave = "greenville.txt";
+		fs.writeFile(greenvilleSave, JSON.stringify(greenvilleWeather), function(err) {
+		    if(err) {
+		        return console.log(err);
+		    }
+
+		    console.log("The file was saved!");
+		}); 
+
+		res.send(greenvilleWeather);
+	});
+	
+});
+
 
 function buildRequests(firstPart, secondPart, unixStartTime, unixEndTime) {
 	var allRequests = [];

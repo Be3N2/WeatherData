@@ -11,14 +11,17 @@ var yellow1 = "#fdd57d";
 var pink1 = "#d6a7b4";
 
 var data = {};
+var greenvilledata = {};
 
 function preload() {
   // preload() runs once
   data = loadJSON('/getdata');
+  greenvilledata = loadJSON('/greenvilledata');
 }
 
 function setup() {
 	print(data);
+	print(greenvilledata);
 	createCanvas(blanketWidth * blockWidth + 1, blanketHeight * blockWidth + 1);
 	background(51);
 	for (var y = 0; y < blanketHeight; y++) {
@@ -28,9 +31,15 @@ function setup() {
 			//{"location": "Ravenna, OH","startDate": "28-May-2018","endDate": "14-Oct-2018","weatherData":[]};
 
 			var colorCode;
-			var icon;
+			var icon = "fill";
 			if (x + y * blanketWidth < data.weatherData.length) {
 				icon = data.weatherData[x + y * blanketWidth].data.currently.icon;
+			} else if(x + y * blanketWidth >= data.weatherData.length) {
+				index = (x + y * blanketWidth) - data.weatherData.length;
+				if (index < greenvilledata.weatherData.length)
+					icon = greenvilledata.weatherData[index].data.currently.icon;
+			} 
+				
 				//icon = data.weatherData[x + y * blanketWidth].data.daily.data[0].icon;
 				//possible icon values
 				//clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night
@@ -57,12 +66,15 @@ function setup() {
 					case "partly-cloudy-night":
 						colorCode = pink1;
 						break;
+					case "fill":
+						colorCode = "#ffffff";
+						break;
 					default:
 						console.log("SOME OTHER ICON VALUE: " + icon);
 						colorCode = "#000000";
 				}
-			} else 
-				colorCode = "#ffffff";
+			
+				
 				
 			
 			fill(colorCode);
