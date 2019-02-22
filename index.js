@@ -43,12 +43,27 @@ app.get('/getdata', function(req, res){
 	fs.readFile('ravenna.txt', 'utf8', function (err, data) {
 	    if (err) throw err; // we'll not consider error handling for now
 	    var obj = JSON.parse(data);
-	    res.send(obj);
+	    fs.readFile('greenville.txt', 'utf8', function (err, data) {
+		    if (err) throw err; // we'll not consider error handling for now
+		    var greenville = JSON.parse(data);
+		    obj.endDate = greenville.endDate;
+		    obj.weatherData = obj.weatherData.concat(greenville.weatherData);
+		    res.send(obj);
+		});
+	    
 	});
 });
 
 app.get('/greenvilledata', function(req, res){
 	fs.readFile('greenville.txt', 'utf8', function (err, data) {
+	    if (err) throw err; // we'll not consider error handling for now
+	    var obj = JSON.parse(data);
+	    res.send(obj);
+	});
+});
+
+app.get('/data', function(req, res){
+	fs.readFile('ravenna.txt', 'utf8', function (err, data) {
 	    if (err) throw err; // we'll not consider error handling for now
 	    var obj = JSON.parse(data);
 	    res.send(obj);
