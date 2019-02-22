@@ -41,6 +41,7 @@ function start() {
               .attr("width", w)
               .attr("height", h)
               .attr("class", "svg");
+    //rect can't contain text so make g then add rect and text to
     svg.selectAll("rect")
         .data(weatherData)
         .enter()
@@ -53,13 +54,40 @@ function start() {
         })
         .attr("width", squareWidth)
         .attr("height", squareWidth)
+        .style("stroke-width", 1)   
+        .style("stroke", "black")
         .attr("fill", (d) => {
             return findColor(d.data.currently.icon);
         })
         .append("title")
         .text((d) => d.day);
-}
 
+    /* Some label options made for a work reference for Abigail
+
+    svg.selectAll("text")
+        .data(weatherData)
+        .enter()
+        .append("text")
+        .attr("x", (d, i) => {
+            return (i % rowWidth) * squareWidth + 5;
+        })
+        .attr("y", (d, i) => {
+            return (Math.floor(i / rowWidth) * squareWidth) + squareWidth / 2;
+        })
+        .text((d, i) => {
+            // Day Label
+            //returning d.day is too big 3-September-2019
+            var date = new Date(d.unixTime * 1000);
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear() % 100;
+            var shortDate = month + "-" + date.getDate() + "-" + year;
+            return shortDate;
+              
+            return i + 1;
+        });
+    */
+        
+}
 function findColor(icon) {
     var colorCode;
     switch (icon) {
