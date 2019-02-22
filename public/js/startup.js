@@ -60,11 +60,11 @@ function setup() {
 						colorCode = blue1;
 						break;
 					case "cloudy":
-						colorCode = darkgreen1;
+						colorCode = pink1;
 						break;
 					case "partly-cloudy-day":
 					case "partly-cloudy-night":
-						colorCode = pink1;
+						colorCode = darkgreen1;
 						break;
 					case "fill":
 						colorCode = "#ffffff";
