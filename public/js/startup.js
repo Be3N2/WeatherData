@@ -57,7 +57,11 @@ function start() {
         .style("stroke-width", 1)   
         .style("stroke", "black")
         .attr("fill", (d) => {
-            return findColor(d.data.currently.icon);
+            returnColor = findColor(d.data.currently.icon);
+            if (d.data.currently.windGust >= 10.00) returnColor = green1;
+            if (returnColor == "#000000") returnColor = findColor(d.data.daily.data[0].icon);
+            return returnColor;
+            //return findColor(d.data.daily.data[0].icon);
         })
         .append("title")
         .text((d) => d.day);
