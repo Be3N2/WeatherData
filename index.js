@@ -155,7 +155,7 @@ app.get('/greenville', function(req, res){
 	var startDate = new Date("15-Oct-2018 17:00:00");
 	var unixStartTime = startDate.getTime()/1000;
 
-	var endDate = new Date("18-Feb-2019 20:00:00");
+	var endDate = new Date("28-May-2019 20:00:00");
 	var unixEndTime = endDate.getTime()/1000;
 
 	//var ravennaRequests = buildRequests(ravennaFirstPart, ravennaSecondPart, unixStartTime, unixEndTime)

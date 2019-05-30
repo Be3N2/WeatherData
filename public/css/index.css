@@ -31,3 +31,8 @@ text {
 	font-weight: bold;
 }
 
+.special {
+	border-style: solid;
+	border-width: 15px;
+}
+

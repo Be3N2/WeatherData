@@ -1,10 +1,10 @@
 var data;
 var weatherData = [];
-const w = 500;
-const h = 500;
 const rowWidth = 19;
 const rowHeight = 20;
-const squareWidth = w/rowWidth;
+const squareWidth = 500/rowWidth;
+const w = squareWidth * rowWidth;
+const h = squareWidth * rowHeight;
 
 var blue1 = "#667a86";
 var teal1 = "#92b0a9";
@@ -12,6 +12,13 @@ var darkgreen1 = "#353708";
 var green1 = "#9b9844";
 var yellow1 = "#fdd57d";
 var pink1 = "#d6a7b4";
+
+var blueTally = 0;
+var tealTally = 0;
+var darkGreenTally = 0;
+var greenTally = 0;
+var yellowTally = 0;
+var pinkTally = 0;
 
 function fetchData(url)
 {
@@ -54,19 +61,26 @@ function start() {
         })
         .attr("width", squareWidth)
         .attr("height", squareWidth)
-        .style("stroke-width", 1)   
+        .style("stroke-width", (d) => {
+            if (d.day == "28-May-2018")
+                return 10;
+            if (d.day == "28-May-2019") console.log("SPECIAL");
+
+            return 1;
+        }) 
         .style("stroke", "black")
         .attr("fill", (d) => {
             returnColor = findColor(d.data.currently.icon);
             if (d.data.currently.windGust >= 10.00) returnColor = green1;
             if (returnColor == "#000000") returnColor = findColor(d.data.daily.data[0].icon);
+            tally(returnColor);
             return returnColor;
             //return findColor(d.data.daily.data[0].icon);
         })
         .append("title")
         .text((d) => d.day);
 
-    /* Some label options made for a work reference for Abigail
+    // Some label options made for a work reference for Abigail
 
     svg.selectAll("text")
         .data(weatherData)
@@ -81,16 +95,21 @@ function start() {
         .text((d, i) => {
             // Day Label
             //returning d.day is too big 3-September-2019
-            var date = new Date(d.unixTime * 1000);
-            var month = date.getMonth() + 1;
-            var year = date.getFullYear() % 100;
-            var shortDate = month + "-" + date.getDate() + "-" + year;
-            return shortDate;
+            //var date = new Date(d.unixTime * 1000);
+            //var month = date.getMonth() + 1;
+            //var year = date.getFullYear() % 100;
+            //var shortDate = month + "-" + date.getDate() + "-" + year;
+            //return shortDate;
               
             return i + 1;
         });
-    */
-        
+    
+        console.log("yellowTally: " + yellowTally);
+        console.log("tealTally: " + tealTally);
+        console.log("greenTally: " + greenTally);
+        console.log("blueTally: " + blueTally);
+        console.log("pinkTally: " + pinkTally);
+        console.log("darkGreenTally: " + darkGreenTally);
 }
 function findColor(icon) {
     var colorCode;
@@ -125,4 +144,27 @@ function findColor(icon) {
             colorCode = "#000000";
     }
     return colorCode;
+}
+
+function tally(color) {
+    switch (color) {
+        case "#667a86":
+            ++blueTally;
+            break;
+        case "#92b0a9":
+            ++tealTally;
+            break;
+        case "#353708":
+            ++darkGreenTally;
+            break;
+        case "#9b9844":
+            ++greenTally;
+            break;
+        case "#fdd57d":
+            ++yellowTally;
+            break;
+        case "#d6a7b4":
+            ++pinkTally;
+            break;
+    }
 }
